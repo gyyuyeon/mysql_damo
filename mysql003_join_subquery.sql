@@ -473,4 +473,170 @@ where not exists ( select 1
 				from employees m
 				where m.employee_id = e.manager_id);
                 
-                
+/*=============================
+ WITH ROLLUP
+ 총합 또는 중간 합계가 필요할때 GROUP by 절과 함께 WITH ROLLUP문을 사용한다.
+ ================================*/
+ 
+ select department_id, job_id, count(*) as count
+ FROM employees
+ GROUP BY department_id, job_id with rollup
+ order by department_id desc, job_id desc;
+ 
+ /*=============================
+ WITH ROLLUP
+ 총합 또는 중간 합계가 필요할때 GROUP by 절과 함께 WITH ROLLUP문을 사용한다.
+ ================================*/
+
+SELECT department_id, job_id, count(*) as count
+FROM employees
+GROUP BY department_id, job_id WITH ROLLUP 
+ORDER BY department_id DESC, job_id DESC;
+
+/*=================================================================================
+ 그룹내 순위관련함수
+ RANK( ) OVER( ) : 특정 컬럼에 대한 순위를 구하는 함수로 동일한 값에 대해서는 동일한 순위를 준다.  OVER()안에 정렬 기준이 되는 값이 필요
+ DENSE_RANK( ) OVER( ) : 동일한 순위를 하나의 건수로 취급한다. OVER()안에 정렬 기준이 되는 값이 필요
+ ROW_NUMBER( ) OVER( ) : 동일한 값이라도 고유한 순위를 부여한다.
+ ===================================================================================*/
+ /* RANK      DENSE_RANK   ROW_NUMBER
+90   1         1         1
+90   1         1         2
+85   3         2         3
+80   4         3         4
+*/
+
+SELECT job_id, first_name, salary, RANK() OVER(ORDER BY salary DESC)
+FROM employees;
+ 
+SELECT job_id, first_name, salary, DENSE_RANK() OVER(ORDER BY salary DESC)
+FROM employees;
+
+SELECT job_id, first_name, salary, ROW_NUMBER() OVER(ORDER BY salary DESC)
+FROM employees;
+
+SELECT job_id, first_name, salary,  ROW_NUMBER() OVER()
+FROM employees;
+
+-- 그룹별로 순위를 부여할 때 사용 : PARTITION BY
+SELECT job_id, first_name, salary, RANK() OVER(PARTITION BY job_id ORDER BY salary DESC)
+FROM employees;
+
+SELECT job_id, first_name, salary, DENSE_RANK() OVER(PARTITION BY job_id ORDER BY salary DESC)
+FROM employees;
+
+-- =============================================================================================
+-- 급여가 가장 높은 상위 3명을 검색하시오.
+SELECT first_name, salary
+FROM employees
+ORDER BY salary DESC
+limit 3;  -- 개수
+ 
+ select row_number() over(order by salary desc) as rownm, first_name, salary
+ from employees
+ limit 0, 1;
+ 
+  -- 급여가 가장 높은 상위 4위부터 8위까지 검색하시오.
+ select row_number() over(order by salary desc) as rownm, first_name, salary
+ from employees
+ limit 3, 5;
+ 
+  select row_number() over(order by salary desc) as rownm, first_name, salary
+ from employees
+ limit 5 offset 3;
+ 
+
+ -- 월 별 입사자 수를 조회하되 입사자수가 가장 많은 상위 3개만 출력되도록 하시오.
+--  <출력:   월     입사자수 >
+select month(hire_date), count(*)
+from employees
+GROUP BY month(hire_date)
+order by count(*) desc	
+limit 3;
+
+
+/*==========================================================
+with절과 cte
+with절은 cte(common table expression)을 표현하기 위한 구문으로 mysql8.0부터 사용할 수 있다.
+cte는 기존의 뷰,파생 테이블, 임시 테이블 등으로 사용돠ㅣ던 것을 대신할 수 있다.
+cte는 ansi-sql99 표준에서 나온것이다. 기존의 sql ansi-sql92를 기준으로 한다
+최근의 DBMS(DataBase Management System)은 대게 ANSI-SQL99와 호환되므로 다른 DBMS에서도 같거나
+비슷한 방식으로 응용한다.
+CTE는 비재귀적(Non-Recursive) CTE와 재귀적(Recursive) CTE두가지가 있다.
+
+<비재귀적(Non-Recursive)>
+WITH CTE_테이블이름(열이름)
+AS
+(
+쿼리문;
+)
+SELECT 열이름 FROM CTE_테이블 이름;
+==========================================================*/
+with abc(first_name, salary)
+as
+(
+select first_name, salary
+from employees
+where department_id = 90
+)
+select*from abc;
+
+with abc(f, s)
+as
+(
+select first_name, salary
+from employees
+where department_id = 90
+)
+select f, s from abc;
+
+/*======================================================================
+<재귀적(Recursive)>
+WITH recursive CTE_테이블이름(열이름)
+AS
+(
+쿼리문;
+)
+SELECT 열이름 FROM CTE_테이블 이름;
+https://mariadb.com/kb/en/recursive-common-table-expressions-overview/
+==========================================================*/
+-- 매니저 -> 사원 107 row
+with recursive cte (employee_id, manager_id, level, first_name) as(
+SELECT employee_id, manager_id, 1, first_name
+from employees
+WHERE MANAGER_ID is null
+UNION all
+SELECT e.employee_id, e.manager_id, cte.level + 1, e.first_name  -- steven을 직송상사로 둔 사원의 empoyee_id 를 
+from employees e
+inner join cte on e.MANAGER_ID = cte.EMPLOYEE_ID
+)
+SELECT EMPLOYEE_ID, level, concat(repeat(' ',3 * (level - 1)),first_name) As name
+from cte
+ORDER BY EMPLOYEE_ID;
+
+SELECT EMPLOYEE_ID, MANAGER_ID, FIRST_NAME
+FROM employees
+where MANAGER_ID is null
+UNION all
+SELECT e.employee_id, e.manager_id, e.first_name
+from employees e;
+
+-- 1. steven를 직속 상사로 두고있는 사람들 
+SELECT e.employee_id, e.manager_id, e.first_name
+from employees e
+inner join employees m on e.manager_id = m. employee_id 
+where e.manager_id=100;
+
+-- 사원 -> 매니저 is not null 208 row 
+with recursive cte (employee_id, manager_id, level, first_name) as(
+SELECT employee_id, manager_id, 1, first_name
+from employees
+WHERE MANAGER_ID is not null
+UNION all
+SELECT e.employee_id, e.manager_id, cte.level + 1, e.first_name 
+from employees e
+inner join cte on e.MANAGER_ID = cte.EMPLOYEE_ID
+)
+SELECT EMPLOYEE_ID, level, concat(repeat(' ',3 * (level - 1)),first_name) As name
+from cte
+ORDER BY EMPLOYEE_ID;
