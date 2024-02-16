@@ -1,0 +1,263 @@
+/*
+스토어드 프로시저(Stored Procedure) : 여러 쿼리문을 일괄 처리하기 위한 용도롤 사용하는 기능이다.
+*/
+
+CREATE TABLE usertbl -- 회원 테이블
+( userID  	CHAR(8) NOT NULL PRIMARY KEY, -- 사용자 아이디(PK)
+  name    	VARCHAR(10) NOT NULL, -- 이름
+  birthYear   INT NOT NULL,  -- 출생년도
+  addr	  	CHAR(2) NOT NULL, -- 지역(경기,서울,경남 식으로 2글자만입력)
+  mobile1	CHAR(3), -- 휴대폰의 국번(011, 016, 017, 018, 019, 010 등)
+  mobile2	CHAR(8), -- 휴대폰의 나머지 전화번호(하이픈제외)
+  height    	SMALLINT,  -- 키
+  mDate    	DATE  -- 회원 가입일
+);
+CREATE TABLE buytbl -- 회원 구매 테이블(Buy Table의 약자)
+(  num 		INT AUTO_INCREMENT NOT NULL PRIMARY KEY, -- 순번(PK)
+   userID  	CHAR(8) NOT NULL, -- 아이디(FK)
+   prodName 	CHAR(6) NOT NULL, --  물품명
+   groupName 	CHAR(4)  , -- 분류
+   price     	INT  NOT NULL, -- 단가
+   amount    	SMALLINT  NOT NULL, -- 수량
+   FOREIGN KEY (userID) REFERENCES usertbl(userID)
+);
+
+INSERT INTO usertbl VALUES('LSG', '이승기', 1987, '서울', '011', '1111111', 182, '2008-8-8');
+INSERT INTO usertbl VALUES('KBS', '김범수', 1979, '경남', '011', '2222222', 173, '2012-4-4');
+INSERT INTO usertbl VALUES('KKH', '김경호', 1971, '전남', '019', '3333333', 177, '2007-7-7');
+INSERT INTO usertbl VALUES('JYP', '조용필', 1950, '경기', '011', '4444444', 166, '2009-4-4');
+INSERT INTO usertbl VALUES('SSK', '성시경', 1979, '서울', NULL  , NULL      , 186, '2013-12-12');
+INSERT INTO usertbl VALUES('LJB', '임재범', 1963, '서울', '016', '6666666', 182, '2009-9-9');
+INSERT INTO usertbl VALUES('YJS', '윤종신', 1969, '경남', NULL  , NULL      , 170, '2005-5-5');
+INSERT INTO usertbl VALUES('EJW', '은지원', 1972, '경북', '011', '8888888', 174, '2014-3-3');
+INSERT INTO usertbl VALUES('JKW', '조관우', 1965, '경기', '018', '9999999', 172, '2010-10-10');
+INSERT INTO usertbl VALUES('BBK', '바비킴', 1973, '서울', '010', '0000000', 176, '2013-5-5');
+INSERT INTO buytbl VALUES(NULL, 'KBS', '운동화', NULL   , 30,   2);
+INSERT INTO buytbl VALUES(NULL, 'KBS', '노트북', '전자', 1000, 1);
+INSERT INTO buytbl VALUES(NULL, 'JYP', '모니터', '전자', 200,  1);
+INSERT INTO buytbl VALUES(NULL, 'BBK', '모니터', '전자', 200,  5);
+INSERT INTO buytbl VALUES(NULL, 'KBS', '청바지', '의류', 50,   3);
+INSERT INTO buytbl VALUES(NULL, 'BBK', '메모리', '전자', 80,  10);
+INSERT INTO buytbl VALUES(NULL, 'SSK', '책'    , '서적', 15,   5);
+INSERT INTO buytbl VALUES(NULL, 'EJW', '책'    , '서적', 15,   2);
+INSERT INTO buytbl VALUES(NULL, 'EJW', '청바지', '의류', 50,   1);
+INSERT INTO buytbl VALUES(NULL, 'BBK', '운동화', NULL   , 30,   2);
+INSERT INTO buytbl VALUES(NULL, 'EJW', '책'    , '서적', 15,   1);
+INSERT INTO buytbl VALUES(NULL, 'BBK', '운동화', NULL   , 30,   2);
+
+SELECT * FROM usertbl;
+SELECT * FROM buytbl;
+
+/*
+변수의 사용
+SQL도 다른 일반적인 프로그래밍 언어처럼 변수를 선언하고 사용할 수 있다. 
+
+SET @변수이름 = 값;    -- 변수의 선언 및 대입
+SELECT @변수이름      -- 변수의 값 출력
+*/
+
+set @myVar1 = 5;
+set @myVar2 = 3;
+set @myVar3 = 4.25;
+set @myVar4 = '가수 이름 ==>' ;
+
+select @myVar1;
+select @myVar2 + @myVar3;
+
+-- 변수명을 커리문에서 쓰는방법
+select @myVar4,name 
+from usertbl
+where height>180;
+
+-- 나중에 적용하는 업데이트
+-- limit 에는 원칙적으로 변수를 사용할수없으난 prepare 와 execute 를 이용해서 사용할수는있다
+set @myVar3 =3;
+
+prepare myquery
+from
+'select name , height
+from usertbl
+order by height
+limit ?';               -- limit @myVar3; 이렇게 하면 오류가남(limit에서 바로 변수값을 사용하려면)
+
+execute myquery using @myVar3;  
+
+/*--------------------------------------------------------------------
+스토어드 프로시저
+DELIMITER $$
+CREATE PROCEDURE 스토어드_프로시저이름( )
+BEGIN
+      이 부분에 SQL 프로그래밍 구현
+END $$
+DELIMITER ;  -- 기호바꾸기임 delimiter
+CALL 스토어드_프로시저이름()
+-- ----------------------------------------------------------------*/
+drop procedure if EXISTS ifproc; -- 기존에 만든적 있다면 삭제
+
+delimiter $$
+create procedure ifproc()
+begin
+	declare var1 int; -- 변수 var1선언 
+    set var1 = 100; -- var1 변수에 값 할당
+    
+    if var1 = 100 then 
+		select '100입니다';
+	else
+		select'100이 아닙니다';
+	end if;
+    
+end $$
+delimiter ;
+
+call ifproc();
+
+-- -----------------------------------------
+-- if ~ else ~ end if 
+
+use myxedb;
+drop PROCEDURE if exists ifproc2;
+delimiter $$
+create procedure ifproc2()
+begin
+	DECLARE hiredate date;
+    declare curdate date;
+    declare days int;
+    
+    select hire_date into hiredate
+    from employees
+    where employee_id =100;
+    
+    set curdate = current_date(); -- 현재 날짜
+    set days = datediff(curdate, hiredate);
+    
+    if (days/365) >= 5 then -- 5년 이상이면 연차
+		select concat('입사한지',days,'일이 지났습니다. 축하합니다!');
+	else 
+		select concat('입사한지',days,'일이 지났습니다.');
+    end if;
+end $$
+delimiter ;
+
+call ifproc2();
+
+-- -----------------------------------------
+-- if ~ else ~ end if 
+drop procedure if exists ifproc3;
+delimiter $$
+create procedure ifproc3()
+begin
+	DECLARE point int;
+    declare credit char(1);
+    
+    
+    set point = 77;
+    
+    
+    if point >= 90 then
+		set credit ='A';
+	elseif point >= 80 then
+		set credit ='B';
+	elseif point >= 70 then
+		set credit ='C';
+	else
+		set credit ='F';
+    end if;
+    
+    select concat('취드점수=>', point), concat('학점=>',credit);
+end $$
+delimiter ;
+
+call ifproc3();
+
+--    -----------------------------------------------------
+-- case ~ when ~ end
+drop procedure if exists caseroc; 
+delimiter $$
+create procedure caseroc()
+begin
+	DECLARE point int;
+    declare credit char(1);
+    
+    
+    set point = 77;
+    
+    case
+		when point >= 90 then
+			set credit ='A';
+		when point >= 80 then
+			set credit ='B';
+		when point >= 70 then
+			set credit ='C';
+		else
+			set credit ='F';
+		end case;
+    
+    select concat('취드점수=>', point), concat('학점=>',credit);
+end $$
+delimiter ;
+
+call caseroc();
+
+
+--    -----------------------------------------------------
+-- while ~ do ~ end while
+
+drop procedure if exists whileproc; 
+delimiter $$
+create procedure whileproc()
+begin
+	DECLARE i int; -- 1에서 100 까지 증가할 변수
+    declare hap int; -- 누적변수
+    
+    
+    set i = 1;
+    set hap = 0;
+    
+    while i<=100 do
+		set hap = hap+i;
+        set i = i+1;
+    end while;
+		
+    
+    select hap;
+end $$
+delimiter ;
+
+call whileproc();
+
+-- --------------------------------------------------------------------
+-- while ~ do ~ end while
+/*
+이 코드는 1부터 시작하여 100까지의 숫자 중 7의 배수를 제외하고 모든 숫자의 합을 구합니다. 합이 1000을 초과하는 순간 루프를 종료합니다.
+*/
+drop procedure if exists whileproc2; 
+delimiter $$
+create procedure whileproc2()
+begin
+	DECLARE i int; -- 1에서 100 까지 증가할 변수
+    declare hap int; -- 누적변수
+    
+    
+    set i = 1;
+    set hap = 0;
+    
+    mywhile: while i<=100 do
+		if i%7=0 then
+			set i = i+1;
+            iterate mywhile; -- 지정한 label문으로 가서 계속 진행
+		end if;
+        set hap = hap+i;
+        
+        if hap > 1000 then
+			leave mywhile; -- 지정한 label 문을빠져나감 (누적된 값이1000보다 커지면)
+        end if;
+        
+        set i = i+1;
+    end while;
+		
+    
+    select i, hap;
+end $$
+delimiter ;
+
+call whileproc2();
