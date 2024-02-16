@@ -234,15 +234,104 @@ Edit >  Preferences > SQL Editor > SQL Execution
 rollback; -- 오토커밋이 꺼져서 다시 되살아나기 성공
 select * from members;
  
- 
- 
- 
- 
- 
- 
- 
- 
+insert into members -- 지금 버퍼에 있는상태이고 데이터베이스에 정식등록 된것은 아님 -> cmd에서 확인시 나오지 않음
+VALUES('안이슬',19,85.9,curdate(),'서울'); 
 
+select * from members;
+
+commit; -- > into 하거나 한후 commit을 해줘야함 ( 새로운 트랜잭션 시작)
+select * from members;
+
+delete from members
+where name='홍길동';
+select * from members;
+delete from members
+where name='김민재';
+ 
+savepoint sp;
+ 
+insert into members 
+values('korea',32,50,curdate(),'je');  
+select * from members;
+
+ROLLBACK to sp;   -- 롤백은 commit 전까지? 롤백하는것
+select * from members;
+
+commit;
+select * from members;
+
+-- 삭제 명령아 3개
+/*================================================
+TRUNCATE : 테이블에 저장된 데이터를 모두 제거한다.(auto COMMIT이 됨)
+DROP : 테이블 자체를 제거한다.
+DELETE : 테이블에 저장된 데이터를 모두 삭제한다.(auto COMMIT이 안됨)
+==================================================*/
+
+TRUNCATE table members ;
+DROP table members ;
+select * from members;
+
+use mywork;
+create table student(
+name varchar(20),
+age int,
+avg decimal(5,2),
+hire date
+);
+
+insert into student(name, age, avg, hire)
+VALUES('홍길동', 30,97.85,curdate());
+select*from student;
+
+insert into student(name, age, avg, hire)
+VALUES('김민재', 28,80.2,sysdate());  
+select*from student;
+
+-- 오토커밋이 꺼져있는 상태이기 때문에 실제 데이터 베이스에는 등록이 안되어있다
+commit;
+
+-- a세션
+update student 
+set age=40 
+where name = '홍길동';
+
+select*from student;
+
+-- B세션
+UPDATE student
+SET age = 40
+WHERE name = '홍길동'; -- a세션의 대답을 기다리는 대기상태
+
+-- A세션
+ROLLBACK;
+
+-- B세션의 UPDATE을 적용시킨다.
+
+select*from student;
+-- AUTOCOMMIT 설정
+set AUTOCOMMIT = 1; -- 이제 insert delete하면 모드 시스템 테이블에 바로적용됨
+
+/*
+1. AUTOCOMMIT 설정
+   1) SQL 명령어가 바로 실제 테이블에 적용된다
+      transaction start -> update -> transaction commit
+   2) 수동 transaction 설정
+      START TRANSACTION; -> update -> COMMIT;
+
+
+ 2. AUTOCOMMIT 해제 (하나의 transaction 이 끝남과동시에 새로운 transaction이 시작된다)
+	ddl, rollback, commit -> commit
+    
+    
+ 3. 현재 AUTOCOMMIT 확인
+ select @@AUTOCOMMIT; -- 1이면 설정되어있는것 0이면 해제되어있는것
+ 
+ 4. AUTOCOMMIT 해제
+ set AUTOCOMMIT = 0;
+ 
+ 5. AUTOCOMMIT 설정
+ set AUTOCOMMIT = 1;
+*/
 
 
 
