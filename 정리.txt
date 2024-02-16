@@ -1,0 +1,35 @@
+select
+from
+where     -- where
+group by -- 집계함수 랑 그냥쓰면안된다 질문
+having
+order by
+
+
+
+where(조건 연산자)
+where  and , or , in(같은컬럼안에서 해당값)
+NOT BETWEEN 3000 AND 5000 이런거도 있음
+is 연산자 - 논리?(null)일때만 쓰나? ㅇㅇ
+이름에 특정 문자열이 포함되어있을때 거르는법 LIKE'%der%'
+
+asc 어센딩이 머임 - 오름차순 내림차순
+
+concat 함수?
+
+
+문자열 거르는 파트
+-- employees테이블에서 first_name에 'dre'가 포함될때
+-- firtst_name, salary, email을 출력
+SELECT first_name, salary, email
+FROM employees
+WHERE first_name LIKE'%der%';
+-- '%문자%' 문자가 포함이 된 // '%문자' 문자로 시작이 되는
+
+-- employees 테이블에서 first_name의 값 중 'A'로 시작하고
+-- 두번째 문자는 임의문자이며 'exander'로 끝날때
+-- firtst_name, salary, email을 출력
+SELECT first_name, salary, email
+FROM employees
+-- 임의의 문자(wild card)사용시에는 해당 문자의 자리에 _(언더바)사용
+WHERE first_name LIKE 'A_exander';
