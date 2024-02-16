@@ -290,6 +290,10 @@ where code = 'p001';
 select*from dept2;
 select*from emp3;
 
+delete from dept2
+where code ='p002';
+select*from dept2;
+select*from emp3;
 
 
 
