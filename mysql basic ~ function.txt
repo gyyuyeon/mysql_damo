@@ -1,0 +1,61 @@
+-- basic --
+
+기본 형태
+SELECT column_name, column_name
+FROM table_name
+WHERE column_name='value'     <- 테이블에서 특정 컬럼에 해당하는 조건을 설정하는 곳
+GROUP BY column_name          <- 그룹 함수일경우 꼭필요함
+HAVING column_name='value'    <- 그룹화한 결과에 관하여 조건을 설정하는 곳
+ORDER BY column_name ASC(DESC);    <- 내림차순 오름차순 무조건 SELECT 문의 가장 마지막에 위치해야함
+
+-- WHERE(조건 연산자)
+and, or, in(캍은 커럼안에서 해당값이 있는지 없는지 - 포함 미포함)
+between A and B 
+is 연산자 - null 일때만 쓴다 ex) in null , in not null
+LIKE '%문자%' 문자가 포함이 된 // '%문자' 문자로 시작이 되는 (문자열을 거를때 사용한다)
+<< in은 문자 포함아니라 steven이라는 사람이 있는지 없는지 그컬럼에 LIKE는 컬럼에 value가 steven이라는 글자를 가지는지
+<< in은 일치해야하고 LIKE는 가지고만 있어도 된다.
+임의의 문자(wild card)사용시에는 해당 문자의 자리에 _(언더바)사용
+WHERE first_name LIKE 'A_exander';  _ 자리에 모든 문자가 올수있다 2글자면 __(언더바 2번사용)
+
+-- fuction(함수)--
+
+1) sql 함수
+1. 단일행함수 : 행 하나당 하나의 결과를 출력한다
+              (문자함수, 숫자함수, 날짜함수, 변환함수, 일반함수)
+2. 복수행함수 : 행 여러개당 하나의 결과를 출력한다
+               (합계, 평균, 최대, 최소, 갯수) 
+3. sql 표시함수
+cast(expression AS 데이터형식 [(길이)])  // 데이터 형식 중에서 가능한 것은 binary, char, date, datetime, decimal, json, signed integer, time, unsigned integer등이다.
+convert( expression, 데이터형식 [(길이)])
+concat( 안에 있는거 그냥 연결1,연결1 )
+
+2) 일반 함수
+upper, lower, length, round, ceil(올림), floor(버림)
+adddate(날짜, 차이), subdate(날짜,차이) // 날짜를 기준으로 차이를 더하거나 뺀 날짜
+year, month, day      + curdate() << - 현재시간을 알려주는 함수
+date(now()), time(now()) << 이렇게도 가능
+
+3) ifnull관련 함수 
+대체값에는 숫자, 문자, 날짜 가능
+ifnull(컬럼, 대체값) : 첫번째 인자값이 null이면 0으로 대체해서 출력한다.
+if(컬럼, 대체1, 대체2) : 컬럼의 값이 null아니면 대체1로, null이면 대체2로 출력한다. 
+nullif(표현식1, 표현식2 ) : 표현식1과 표현식2가 같으면 NULL, 다르면 표현식1로 출력한다.
+
+4) case when 
+case when 조건1 then 결과1
+      when 조건2 then 결과2
+      when 조건3 then 결과3
+      else 결과n
+   end AS alias;
+자바에서 if-else와 비슷한 의미
+
+
+
+
+
+
+
+
+
+

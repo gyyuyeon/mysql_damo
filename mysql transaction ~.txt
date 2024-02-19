@@ -1,0 +1,40 @@
+-- transaction -- 
+
+트랜잭션(Transaction)은 데이터베이스 관리 시스템(DBMS)에서 여러 개의 작업을 하나의 논리적 단위로 묶어서 실행하는 개념
+
+1) SQL 명령어 분류
+
+1. DQL - 데이터를 검색해서 추출할때 사용되는 명령어		-- SELECT
+2. DML - 데이터를 추가, 수정, 삭제, 병합 해주는 명령어들 		-- INSERT, UPDATE, DELETE, MERGE
+<< 데이터 단위 명령어 같음
+3. DDL - 테이블 구조를 정의, 변경 해주는 명렁어			-- CREATE, DROP, ALTER, TRUNCATE 
+<< 데이터가 아니라 테이블 단위 명령어 같음
+4. TCL - 트랜잭션 처리어  					-- COMMIT, ROLLBACK, SAVEPOINT
+
+
+2) 기본 테이블 구조 정의
+
+1. 기본형태
+CREATE TABLE table_name(
+  column_name datatype,
+  column_name datatype
+);
+
+2. 자료형(datatype) 설명
+varchar - 가변길이 문자를 저장
+char - 고정길이 문자를 저장
+int-정수저장
+decimal(m,n)- 실수저장
+date - 날짜 저장
+
+3. 기본 예제 설명
+create table student(      -- student table 생성
+name varchar(20),          -- 컬럼명 name 단어 20개제한
+age int,                       -- 컬럼명 age 정수형으로만 가능
+avg decimal(5,2),           -- 컬럼명 avg  실수형으로 총 5글자 소숫점 2자리까지 지원 소숫점 3자리 아래는 반올림
+hire date                     -- 컬럼명 hire 날짜 curdate()
+);
+select*from student;   << - studnet table 에 있는 모든 컬럼을 다들고 와라 
+
+
+3) ALTER 객체(테이블)의 구조를 변경해주는 명령어이다.
