@@ -1,0 +1,30 @@
+1. List
+main - ListCall - memController.listProcess()[MemController]
+
+Controller - service.getMemList()[MemService]
+
+Service - JdbcTemplate.getConnection()[JdbcTemplate]
+
+JdbcTemplate - (Connection - url/user/password ) - return conn[Service]
+
+Service 
+- AutiCommit(false) 필수 
+- MemDAO.getInstance()[MemDAO] ??? 선언만 하는건가?
+- dao.getListMethod(conn)[MemDAO]
+
+
+
+
+2. Insert
+
+conn rs cstmt 정확히
+mysql
+spring + mybatis + jsp + jquery
+spring boot + jpa +react (native - 모바일)
+
+javascript
+
+dom
+
+my 바티스 빌드 path설정
+파일 config - configratio.xml

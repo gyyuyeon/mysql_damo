@@ -1,0 +1,25 @@
+
+-- 기본 흐름 -- 
+main 
+-> 
+EmployeeDAO[controll,service]
+configuration 실행
+->
+configuration(SQL_ID경로 , Mapper경로)
+Mapper에서 DTO private에 값 저장 (가져오려면 선언후 getter setter)
+mysql.properties 에서 유저정보 가져오기 
+-> 
+EmployeeDAO[controll,service]
+session 변수에 값을 넣은후 DAO에서 session을 호출하여 컨트롤하는 메소드를 작성
+->
+main 
+view 작성및 process 호출
+
+
+-- JOIN -- 추가할시
+joinMapper 추가 (ResultMap & autoMapping ) -> configuration<경로 추가> -> DTO변수(getset)
+-> DAO에 컨트롤 메소드 추가 -> 메인에 view
+
+-- COllECTION --추가할시
+joinMapper에 (ResultMap & autoMapping ) -> DTO변수(getset)
+-> DAO에 컨트롤 메소드 추가 -> 메인에 view
